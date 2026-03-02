@@ -1,0 +1,14 @@
+{
+    "task": {
+        "task_class": "IntercodeSQLTask",
+        "filepath": "data/intercode_sql"
+    },
+    "env_config": {
+        "env_class": "IntercodeSQLEnv",
+        "instruction_path": "prompt/instructions/intercode_sql_inst.txt",
+        "icl_path": "prompt/icl_examples/intercode_sql_icl.json",
+        "icl_format": "first",
+        "max_steps": 10
+    },
+    "output_dir": "outputs/intercode_sql"
+}
