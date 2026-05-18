@@ -6,11 +6,14 @@ BEACON_DIR="${BEACON_DIR:-/mnt/dataset/fengshuwen/agent-post-train/BEACON}"
 PYTHON_BIN="${PYTHON_BIN:-${BEACON_DIR}/.venv/bin/python}"
 MODEL_PATH="${MODEL_PATH:-/home/fengshuwen/data/hf_cache/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306}"
 LORA_ADAPTER_PATH="${LORA_ADAPTER_PATH:-/mnt/dataset/fengshuwen/HPL/saves/qwen2_5_1p5b_lora_step_sft}"
+TRAINER_LOGGER="${TRAINER_LOGGER:-['console','wandb']}"
 
 export CUDA_DEVICE_ORDER=PCI_BUS_ID
 export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-1,2,4}"
 export NCCL_P2P_DISABLE="${NCCL_P2P_DISABLE:-1}"
 export VLLM_ATTENTION_BACKEND="${VLLM_ATTENTION_BACKEND:-XFORMERS}"
+export JAVA_HOME="${JAVA_HOME:-/usr/lib/jvm/java-11-openjdk-amd64}"
+export LD_LIBRARY_PATH="${JAVA_HOME}/lib/server:${LD_LIBRARY_PATH:-}"
 export PYTHONPATH="${BEACON_DIR}:${PYTHONPATH:-}"
 
 N_GPUS=$(echo "${CUDA_VISIBLE_DEVICES}" | tr ',' '\n' | wc -l)
@@ -78,7 +81,7 @@ cd "${BEACON_DIR}"
   env.webshop.exclude_goal_indices_path=/mnt/dataset/fengshuwen/HPL/data/webshop/test_indices.json \
   trainer.critic_warmup=0 \
   trainer.resume_mode=auto \
-  trainer.logger=['console'] \
+  trainer.logger="${TRAINER_LOGGER}" \
   trainer.project_name=verl_agent_webshop \
   trainer.experiment_name=hpl_lora_migpo_qwen2_5_1p5b_gpu124 \
   trainer.n_gpus_per_node="${N_GPUS}" \

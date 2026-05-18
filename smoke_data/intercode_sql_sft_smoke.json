@@ -1,0 +1,12 @@
+[
+  {
+    "instruction": "You are solving an InterCode-SQL task. Write the next SQL command.",
+    "input": "Question: Count the number of users in table users.",
+    "output": "Thought: The task asks for a count over all rows.\nAction: SELECT COUNT(*) FROM users;"
+  },
+  {
+    "instruction": "You are solving an InterCode-SQL task. Write the next SQL command.",
+    "input": "Question: Return all product names from table products.",
+    "output": "Thought: The task asks for the name column.\nAction: SELECT name FROM products;"
+  }
+]

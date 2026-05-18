@@ -181,3 +181,13 @@ upload.py
 *.pid
 saves/
 outputs/
+tmp/
+
+# Local third-party checkouts and large WebShop assets
+LLaMA-Factory/
+envs/webshop/
+
+# Local datasets, caches, and generated training data
+data/eto/
+data/hf_cache/
+data/processed/

@@ -1,0 +1,18 @@
+{
+    "task": {
+        "task_class": "WebShopTask",
+        "filepath": "data/webshop"
+    },
+    "env_config": {
+        "env_class": "WebShopEnv",
+        "instruction_path": "prompt/instructions/webshop_inst.txt",
+        "icl_path": "prompt/icl_examples/webshop_icl.json",
+        "icl_format": "first",
+        "max_steps": 10,
+        "file_path": "envs/webshop/data/items_shuffle.json",
+        "attr_path": "envs/webshop/data/items_ins_v2.json",
+        "human_goals": true,
+        "num_products": null
+    },
+    "output_dir": "outputs/webshop_full10"
+}

@@ -1,0 +1,12 @@
+[
+  {
+    "instruction": "You are controlling a WebShop browser. Choose the next action.",
+    "input": "Observation: Find a waterproof phone pouch under 20 dollars.\nAvailable actions: search[waterproof phone pouch], click[back].",
+    "output": "Thought: I should search for the requested product.\nAction: search[waterproof phone pouch]"
+  },
+  {
+    "instruction": "You are controlling a WebShop browser. Choose the next action.",
+    "input": "Observation: Product page shows a waterproof phone pouch priced at $12.99.\nAvailable actions: click[Buy Now], click[back].",
+    "output": "Thought: The item satisfies the price and product constraints.\nAction: click[Buy Now]"
+  }
+]

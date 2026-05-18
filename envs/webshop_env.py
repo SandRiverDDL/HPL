@@ -31,10 +31,15 @@ class WebShopEnv(BaseEnv):
     
     def parse_action(self, llm_output: str) -> str:
         llm_output = llm_output.strip()
-        pattern = re.compile(r"Action: (.*)", re.DOTALL)
+        tag_pattern = re.compile(r"<action>\s*(.*?)\s*</action>", re.DOTALL | re.IGNORECASE)
+        tag_matches = tag_pattern.findall(llm_output)
+        if tag_matches:
+            return tag_matches[0].strip()
+
+        pattern = re.compile(r"Action:\s*(.*)", re.DOTALL)
         matches = pattern.findall(llm_output)
         if matches:
-            action = matches[0]
+            action = matches[0].strip()
         else:
             action = "no action"
         assert action is not None

@@ -9,6 +9,7 @@ from colorama import Fore
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 from webshop.web_agent_site.envs import WebAgentTextEnv
+from web_agent_site.engine import engine as webshop_engine
 
 import agents as agents
 import envs as envs
@@ -113,7 +114,16 @@ def main(args: argparse.Namespace):
     logger.info(f"Experiment config: \n{json.dumps(exp_config, indent=2)}")
 
     if 'env_class' in env_config and env_config['env_class'] == 'WebShopEnv':
-        env_config['env'] = WebAgentTextEnv(observation_mode="text", human_goals=True)
+        webshop_kwargs = {
+            "observation_mode": "text",
+            "human_goals": env_config.get("human_goals", True),
+        }
+        for key in ("file_path", "num_products", "filter_goals", "limit_goals", "show_attrs"):
+            if key in env_config:
+                webshop_kwargs[key] = env_config[key]
+        if "attr_path" in env_config:
+            webshop_engine.DEFAULT_ATTR_PATH = env_config["attr_path"]
+        env_config['env'] = WebAgentTextEnv(**webshop_kwargs)
 
     # initialize all the tasks    
     task_config: Dict[str, Any] = exp_config["task"]
@@ -178,6 +188,9 @@ def main(args: argparse.Namespace):
     with logging_redirect_tqdm():
         pbar = tqdm(total=n_todo_tasks)
         for i, task in enumerate(all_tasks):
+            if args.max_tasks is not None and len(state_list) >= args.max_tasks:
+                break
+
             # Only test 10 tasks in debug mode
             if args.debug and i == 5:
                 break
@@ -209,7 +222,7 @@ def main(args: argparse.Namespace):
         for state in state_list:
             if state.reward is not None:
                 reward_list.append(state.reward)
-            if args.exp_config == 'webshop':
+            if args.exp_config.startswith('webshop'):
                 if state.reward == 1:
                     success_list.append(True)
                 else:
@@ -303,6 +316,12 @@ if __name__ == "__main__":
         "--debug",
         action="store_true",
         help="Whether to run in debug mode (10 ex per task).",
+    )
+    parser.add_argument(
+        "--max_tasks",
+        type=int,
+        required=False,
+        help="Maximum number of unfinished tasks to run.",
     )
     parser.add_argument(
         "--override",

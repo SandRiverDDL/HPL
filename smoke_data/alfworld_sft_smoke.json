@@ -1,0 +1,12 @@
+[
+  {
+    "instruction": "You are an ALFWorld household agent. Choose the next action.",
+    "input": "Observation: You are in the kitchen. A clean mug is on the counter. Goal: put the mug in the cabinet.",
+    "output": "Thought: I need to pick up the mug first.\nAction: take mug from counter"
+  },
+  {
+    "instruction": "You are an ALFWorld household agent. Choose the next action.",
+    "input": "Observation: You are holding the mug and standing near the cabinet.",
+    "output": "Thought: I can now place the mug in the cabinet.\nAction: put mug in cabinet"
+  }
+]
