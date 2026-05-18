@@ -3,8 +3,11 @@
 ## 路径
 
 - BEACON 仓库：`/mnt/dataset/fengshuwen/agent-post-train/BEACON`
+- BEACON fork origin：`git@github.com:SandRiverDDL/BEACON.git`
+- BEACON upstream：`https://github.com/ZJU-REAL/BEACON.git`
 - BEACON Python：`/mnt/dataset/fengshuwen/agent-post-train/BEACON/.venv/bin/python`
 - HPL 仓库：`/mnt/dataset/fengshuwen/HPL`
+- HPL fork origin：`git@github.com:SandRiverDDL/HPL.git`
 - HPL 编排脚本目录：`scripts/beacon/`
 
 ## Python 环境
@@ -70,6 +73,16 @@ chy <290498984@qq.com>
 ```
 
 这是仓库本地配置，不是全局 git 配置。
+
+当前 GitHub SSH key 使用标准路径：
+
+```text
+~/.ssh/id_ed25519
+~/.ssh/id_ed25519.pub
+SHA256:PSkRb7o/rrSrl16DPjz+m9wHVujBHciwoPPSkvlaCYI
+```
+
+已验证 `ssh -T git@github.com` 认证到 `SandRiverDDL`。
 
 ## 日志与监控
 
