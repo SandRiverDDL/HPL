@@ -23,6 +23,25 @@
 
 环境复现、依赖版本和 WebShop smoke 细节见 `docs/ENVIRONMENT_SETUP.md`。
 
+## AutoDL 远程状态
+
+当前 AutoDL A800 远程已完成 BEACON WebShop 1-step smoke：
+
+```text
+BEACON: /root/autodl-tmp/projects/BEACON
+HPL:    /root/autodl-tmp/projects/HPL
+GPU:    A800-SXM4-80GB 单卡
+结果:   LOGGER=console, TOTAL_TRAINING_STEPS=1 smoke 训练完成
+```
+
+远程使用 BEACON `.venv`，HF/base model cache 在 `/root/autodl-tmp/cache/huggingface`，SFT LoRA adapter 在：
+
+```text
+/root/autodl-tmp/projects/BEACON/saves/qwen2_5_1p5b_lora_step_sft
+```
+
+AutoDL WebShop runtime、Java、数据文件和 smoke 证据见 `docs/beacon/environment.md` 的 “AutoDL A800 环境”。后续正式训练必须走 tmux/screen 并启用 W&B；smoke 才允许只用 console。
+
 ## 当前入口与产物
 
 - SFT 训练配置：`train/sft/webshop_qwen2_5_1p5b_lora_step.yaml`

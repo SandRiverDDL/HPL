@@ -44,7 +44,7 @@ nvidia-smi || true
 
 ## GitHub Sync
 
-AutoDL 上生成 GitHub 专用 key，只把 `.pub` 内容添加到 GitHub 账号：
+AutoDL 上生成 GitHub 专用 key。只复制 `.pub` 公钥到 GitHub 账号，私钥留在 AutoDL 本机：
 
 ```bash
 mkdir -p ~/.ssh
@@ -53,10 +53,10 @@ ssh-keygen -t ed25519 -C "autodl-$(hostname)-github-$(date +%Y%m%d)" -f ~/.ssh/i
 cat ~/.ssh/id_ed25519_github.pub
 ```
 
-公钥添加后：
+把上一步输出的整行 `ssh-ed25519 ...` 加到 GitHub `SSH and GPG keys` 后，再测试和 clone：
 
 ```bash
-ssh -T git@github.com
+ssh -i ~/.ssh/id_ed25519_github -T git@github.com
 git clone git@github.com:<USER>/<REPO>.git /root/autodl-tmp/projects/<PROJECT_NAME>
 cd /root/autodl-tmp/projects/<PROJECT_NAME>
 git checkout -b autodl/$(hostname)-$(date +%Y%m%d)
@@ -97,17 +97,94 @@ sha256sum -c MANIFEST.sha256
 
 ## HF Download
 
-不要上传本地 HF cache；在 AutoDL 上下载：
+不要上传本地 HF cache；公开 HF dataset / base model 在 AutoDL 上重新下载到 HF cache。无卡模式也可以下载模型 snapshot，但不要加载模型权重：
 
 ```bash
 source /root/autodl-tmp/autodl_env.sh
+unset ALL_PROXY HTTPS_PROXY HTTP_PROXY all_proxy https_proxy http_proxy
+hf download <ORG>/<DATASET> --repo-type dataset
+hf download Qwen/Qwen2.5-1.5B-Instruct
+```
+
+如果直连慢或失败，再临时开启 AutoDL 学术加速：
+
+```bash
 source /etc/network_turbo
-huggingface-cli download <ORG>/<DATASET> --repo-type dataset
-huggingface-cli download Qwen/Qwen2.5-1.5B-Instruct
+hf download <ORG>/<DATASET> --repo-type dataset
+hf download Qwen/Qwen2.5-1.5B-Instruct
 unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
 ```
 
-训练/评测配置优先使用 HF repo id。若框架必须填写本地路径，再用 `huggingface-cli download` 输出的 snapshot 路径；不要同时保留 HF cache 和项目内完整副本。
+下载成功后，命令会输出 snapshot 路径。轻量验证只读 tokenizer/config：
+
+```bash
+MODEL_PATH=<HF_SNAPSHOT_PATH>
+.venv/bin/python - <<'PY'
+from transformers import AutoConfig, AutoTokenizer
+p = "<HF_SNAPSHOT_PATH>"
+tok = AutoTokenizer.from_pretrained(p, local_files_only=True)
+cfg = AutoConfig.from_pretrained(p, local_files_only=True)
+print(tok.__class__.__name__, tok.vocab_size)
+print(cfg.model_type, getattr(cfg, "hidden_size", None))
+PY
+```
+
+训练/评测配置优先使用 HF repo id。若框架必须填写本地路径，再用 `hf download` 输出的 snapshot 路径；不要同时保留 HF cache 和项目内完整副本。
+
+## BEACON / WebShop Runtime
+
+BEACON 这类仓库可能把 WebShop 源码 vendored 进来，但主 lock/requirements 不一定覆盖 WebShop runtime。不要直接安装 WebShop 自带 `requirements.txt`，它可能降级 `torch/transformers/numpy`；只补运行缺口。
+
+已验证的 AutoDL WebShop small/synthetic 最小清单：
+
+```bash
+uv pip install --python .venv/bin/python \
+  gym==0.24.0 numpy==1.26.4 beautifulsoup4==4.11.1 cleantext==1.1.4 \
+  Flask==2.1.2 Werkzeug==2.1.0 rank_bm25==0.2.2 thefuzz==0.19.0 \
+  selenium==4.2.0 scikit-learn pyserini==0.17.0 spacy==3.7.2 \
+  faiss-cpu requests_mock
+uv pip install --python .venv/bin/python \
+  https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+```
+
+`pyserini` 需要 Java 11。无系统 Java 时可装到数据盘，不动 `/usr`：
+
+```bash
+uv pip install --python .venv/bin/python install-jdk
+.venv/bin/python - <<'PY'
+import jdk
+print(jdk.install("11", path="/root/autodl-tmp/cache/java"))
+PY
+export JAVA_HOME=/root/autodl-tmp/cache/java/jdk-11.0.31+11
+export PATH="$JAVA_HOME/bin:$PATH"
+```
+
+small/synthetic WebShop 除 `indexes_1k` 外，通常还需要这些 data 文件：
+
+```text
+webshop/data/items_shuffle_1000.json
+webshop/data/items_ins_v2_1000.json
+webshop/data/items_human_ins.json
+webshop/search_engine/indexes_1k
+```
+
+Ray / vLLM 环境里如果 dashboard agent 报：
+
+```text
+cannot import name 'OtelComponentTypeValues'
+```
+
+先检查 `opentelemetry-*` 版本。vLLM 0.8.5.post1 常见可用修复是：
+
+```bash
+uv pip install --python .venv/bin/python opentelemetry-exporter-prometheus==0.47b0
+```
+
+如果 `libgomp` 报 `Invalid value for environment variable OMP_NUM_THREADS`，检查是否被设成 `0`，改成正整数：
+
+```bash
+export OMP_NUM_THREADS=8
+```
 
 ## Validation
 

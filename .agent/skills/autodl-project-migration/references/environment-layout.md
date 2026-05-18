@@ -115,7 +115,7 @@ AutoDL driver/CUDA 显示 12.8 时，仍可优先安装 `cu124` PyTorch wheel；
 
 ## Codex Bootstrap
 
-AutoDL 无卡模式可以先装 Codex 和 auth，不要下载 HF 模型或跑 GPU smoke。
+AutoDL 无卡模式可以先装 Codex 和 auth，也可以用 `hf download` 下载公开 HF 模型 snapshot 到 cache。不要在无卡/低内存模式加载模型权重或跑 GPU smoke；只做 tokenizer/config 级别验证。
 
 如果服务器 npm 安装卡住，优先从本地已安装 Codex 打包传输：
 
@@ -160,3 +160,13 @@ chmod +x /root/.local/bin/codex
 ```
 
 `auth.json` 是敏感文件，只能放服务器本地 `/root/.codex/auth.json`，不要提交，不要写入日志。
+
+能否启动 Codex 的判断标准：
+
+```bash
+command -v codex
+codex --version
+test -s /root/.codex/auth.json
+```
+
+如果 AutoDL 本机不能直连 OpenAI/Codex 后端，再处理代理或 `ssh -R`；训练环境、HF 下载、GitHub pull/push 不依赖 Codex 反向代理。
