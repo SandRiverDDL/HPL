@@ -111,6 +111,24 @@ export PATH="$JAVA_HOME/bin:$PATH"
 export OMP_NUM_THREADS=8
 ```
 
+Codex 命令路径和反向 SOCKS 代理默认写入远程 `/root/.bashrc`。HPL 提供两个脚本管理这段配置：
+
+```bash
+scripts/autodl/configure_codex_proxy.sh        # 默认端口 17891
+scripts/autodl/remove_codex_proxy.sh
+```
+
+`configure_codex_proxy.sh` 会写入：
+
+```bash
+export PATH=/root/.local/bin:/root/autodl-tmp/tools/node-v24.14.0-linux-x64/bin:$PATH
+export ALL_PROXY=socks5h://127.0.0.1:17891
+export HTTPS_PROXY=socks5h://127.0.0.1:17891
+export HTTP_PROXY=socks5h://127.0.0.1:17891
+```
+
+如果后续要用 AutoDL 直连或学术加速下载大文件，先执行 `scripts/autodl/remove_codex_proxy.sh` 或在当前 shell 临时 `unset ALL_PROXY HTTPS_PROXY HTTP_PROXY all_proxy https_proxy http_proxy`。
+
 AutoDL small/synthetic WebShop 已传入的必要小文件：
 
 ```text

@@ -69,6 +69,13 @@ www-authenticate: Bearer realm="OpenAI API"
 
 ## Use For Codex
 
+如果项目提供脚本，优先使用脚本写入或删除 AutoDL `.bashrc` 配置：
+
+```bash
+scripts/autodl/configure_codex_proxy.sh
+scripts/autodl/remove_codex_proxy.sh
+```
+
 AutoDL 上启动 Codex 前设置：
 
 ```bash
