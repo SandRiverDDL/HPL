@@ -34,6 +34,7 @@
 | [DEPO](methods/depo/README.md) | Dual-Efficiency Preference Optimization | efficiency preference | 已建初版 |
 | [EEF](methods/eef/README.md) | Exploring Expert Failures | expert-failure reuse | 已建初版 |
 | [HSL](methods/hsl/README.md) | Hindsight Supervised Learning | hindsight relabeling | 已建初版 |
+| [Dr.BoT](methods/dr-bot/README.md) | Bag-of-Tricks GRPO/GiGPO baseline | online RL stability tricks | 已建初版 |
 
 ## 当前数据格式记录
 
@@ -55,5 +56,6 @@
 - EEF: https://arxiv.org/abs/2504.13145
 - HSL: https://openreview.net/forum?id=QNfmqMSR7r
 - HSL ICLR poster: https://iclr.cc/virtual/2026/poster/10009594
+- SPEAR / Dr.BoT: https://arxiv.org/abs/2509.22601
 - GiGPO code: https://github.com/langfengQ/verl-agent
 - SPEAR code: https://github.com/TencentYoutuResearch/SPEAR

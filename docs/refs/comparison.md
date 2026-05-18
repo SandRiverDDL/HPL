@@ -8,6 +8,7 @@
 | DEPO | 同时优化 token-per-step 和 steps-per-trajectory 的双效率 | efficiency preference | 不一定依赖 step MC | 中 | 可给 HPL 增加效率维度，避免会做但太啰嗦/太慢 |
 | EEF | 从失败专家轨迹中筛选有益动作和 recovery 片段，再用 SFT 学习 | failed expert segment | 需要从若干 expert 中间状态模拟 | 中 | 比 HPL 更像 RFT 增强版，可能更适合低成本 WebShop 改进 |
 | HSL | 用强模型把 rollout 中实际完成的目标重新标注成 hindsight goal，再做 SFT/DPO | hindsight relabeling | 不依赖 step MC，但依赖强 relabeler | 中 | 可把失败或偏离原目标的轨迹转成可学习正样本 |
+| Dr.BoT | 组合 no KL、clip-higher、去 std/长度归一、过滤无效样本和低方差 group | online RL trick stack | 依赖在线 rollout | 中 | 可作为 BEACON/WebShop RL 的稳定化配置参考 |
 
 ## 对本仓库的实际判断
 

@@ -103,3 +103,56 @@ else:
 修改文件：
 
 - `/mnt/dataset/fengshuwen/agent-post-train/BEACON/verl/trainer/ppo/ray_trainer.py`
+
+## W&B 指标过滤
+
+原 BEACON `Tracking.log()` 会把同一份完整 metric dict 同时写入 console 和 W&B，正式 RL 时 W&B 页面会混入大量低价值或命名误导的指标。
+
+本地新增环境变量：
+
+```bash
+VERL_WANDB_METRIC_ALLOWLIST='metric_a,metric_prefix/*'
+```
+
+行为：
+
+- 只过滤 `wandb` / `vemlp_wandb` 后端，console、MLflow、TensorBoard 等后端仍按原样记录完整指标。
+- pattern 以 `*` 结尾时按前缀匹配；单独设置 `*` 表示 W&B 全量记录。
+- HPL launcher 默认通过 `WANDB_METRIC_ALLOWLIST` 设置核心指标，不包含 `critic/rewards/*`。当前 MiGPO `use_critic=False`，这些 `critic/*` 名字只是 verl 数据统计的历史命名，不是真实 critic 模型输出。
+
+修改文件：
+
+- `/mnt/dataset/fengshuwen/agent-post-train/BEACON/verl/utils/tracking.py`
+- `/mnt/dataset/fengshuwen/HPL/scripts/beacon/run_webshop_lora_rl.sh`
+
+## HPL WebShop synthetic goal 固定
+
+问题：HPL `evaluation.py` 只固定了 WebShop task id，但 small/synthetic WebShop 会在 env 初始化时随机生成商品价格和 synthetic goal 的 price upper。因此未固定 seed 时，不同模型评测的同一个 test id 可能对应不同 instruction，尤其是 price threshold 会漂移。
+
+本地新增：
+
+```json
+"goal_seed": 233
+```
+
+修改文件：
+
+- `/mnt/dataset/fengshuwen/HPL/configs/task/webshop_small_synth_test200.json`
+- `/mnt/dataset/fengshuwen/HPL/configs/task/webshop_small_synth_dev50.json`
+- `/mnt/dataset/fengshuwen/HPL/evaluation.py`
+- `/mnt/dataset/fengshuwen/HPL/envs/webshop/web_agent_site/envs/web_agent_text_env.py`
+
+行为：
+
+- `evaluation.py` 将 `goal_seed` 透传给 `WebAgentTextEnv`。
+- `WebAgentTextEnv` 将 `goal_seed` 传给 `SimServer`。
+- `SimServer` 在 `load_products()` 前设置 seed，覆盖商品价格随机生成和 synthetic goal price upper 随机采样。
+
+验证结果：
+
+```text
+configs/task/webshop_small_synth_test200.json: same=True, n=20
+configs/task/webshop_small_synth_dev50.json: same=True, n=20
+instruction_same_sft_vs_rl25: 200/200
+instruction_same_sft_vs_rl50: 200/200
+```

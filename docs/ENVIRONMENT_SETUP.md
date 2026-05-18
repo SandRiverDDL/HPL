@@ -4,7 +4,7 @@
 
 ## 基本信息
 
-- 项目路径：`/home/fengshuwen/data/HPL`
+- 当前项目路径：`/mnt/dataset/fengshuwen/HPL`
 - 实际挂载：`/mnt/dataset`
 - HPL commit：`dc23ada initial release`
 - WebShop commit：`64fa2a5 Update README.md`

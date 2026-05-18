@@ -118,7 +118,7 @@ def main(args: argparse.Namespace):
             "observation_mode": "text",
             "human_goals": env_config.get("human_goals", True),
         }
-        for key in ("file_path", "num_products", "filter_goals", "limit_goals", "show_attrs"):
+        for key in ("file_path", "num_products", "filter_goals", "limit_goals", "show_attrs", "goal_seed"):
             if key in env_config:
                 webshop_kwargs[key] = env_config[key]
         if "attr_path" in env_config:

@@ -45,6 +45,20 @@ envs/webshop/search_engine/indexes_1k
 LuceneSearcher("envs/webshop/search_engine/indexes_1k").num_docs == 1000
 ```
 
+small/synthetic 评测还必须固定 synthetic goal 生成随机性：
+
+```text
+goal_seed=233
+```
+
+原因：WebShop 原实现会在 `load_products()` 中随机生成商品价格，并在 `get_synthetic_goals()` 中随机采样 price upper。只固定 task id 不够；如果不固定 seed，不同 eval 进程里同一个 id 可能对应不同 instruction，例如 price threshold 不同。
+
+当前 HPL 本地 patch：
+
+- `configs/task/webshop_small_synth_test200.json` 和 `configs/task/webshop_small_synth_dev50.json` 设置 `env_config.goal_seed=233`。
+- `evaluation.py` 将 `goal_seed` 透传给 `WebAgentTextEnv`。
+- `envs/webshop/web_agent_site/envs/web_agent_text_env.py` 在 `SimServer` 调用 `load_products()` 前设置 seed，确保随机价格与 synthetic goal instruction 都固定。
+
 HPL 启动 BEACON 时默认传入：
 
 ```bash

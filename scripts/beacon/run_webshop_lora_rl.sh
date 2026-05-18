@@ -24,6 +24,7 @@ TRAINER_EXPERIMENT_NAME="${TRAINER_EXPERIMENT_NAME:-hpl_lora_migpo_qwen2_5_1p5b_
 MAX_ACTOR_CKPT_TO_KEEP="${MAX_ACTOR_CKPT_TO_KEEP:-1}"
 MAX_CRITIC_CKPT_TO_KEEP="${MAX_CRITIC_CKPT_TO_KEEP:-1}"
 SEPARATE_LORA_ADAPTER_DIR="${SEPARATE_LORA_ADAPTER_DIR:-/mnt/dataset/fengshuwen/HPL/saves/beacon_lora_adapters/${TRAINER_EXPERIMENT_NAME}}"
+WANDB_METRIC_ALLOWLIST="${WANDB_METRIC_ALLOWLIST:-episode/webshop_task_score (not success_rate),episode/success_rate,episode/reward/mean,episode/valid_action_ratio,response_length/mean,response_length/max,response_length/clip_ratio,prompt_length/mean,prompt_length/max,prompt_length/clip_ratio,actor/entropy_loss,actor/ppo_kl,actor/pg_clipfrac,actor/pg_clipfrac_lower,actor/grad_norm,actor/lr,timing_s/step,timing_s/gen,timing_s/update_actor,timing_s/save_checkpoint,perf/total_num_tokens,perf/time_per_step}"
 
 export CUDA_DEVICE_ORDER=PCI_BUS_ID
 export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-1,2,4}"
@@ -33,6 +34,7 @@ export JAVA_HOME="${JAVA_HOME:-/usr/lib/jvm/java-11-openjdk-amd64}"
 export LD_LIBRARY_PATH="${JAVA_HOME}/lib/server:${LD_LIBRARY_PATH:-}"
 export PYTHONPATH="${BEACON_DIR}:${PYTHONPATH:-}"
 export VERL_SEPARATE_LORA_ADAPTER_DIR="${SEPARATE_LORA_ADAPTER_DIR}"
+export VERL_WANDB_METRIC_ALLOWLIST="${WANDB_METRIC_ALLOWLIST}"
 
 N_GPUS=$(echo "${CUDA_VISIBLE_DEVICES}" | tr ',' '\n' | wc -l)
 TOTAL_TRAINING_STEPS_ARG=()
@@ -62,11 +64,13 @@ cd "${BEACON_DIR}"
   actor_rollout_ref.model.lora_adapter_path="${LORA_ADAPTER_PATH}" \
   actor_rollout_ref.model.use_remove_padding=True \
   actor_rollout_ref.model.enable_gradient_checkpointing=True \
-  actor_rollout_ref.actor.optim.lr=1e-5 \
+  actor_rollout_ref.actor.optim.lr=2e-6 \
   actor_rollout_ref.actor.optim.warmup_style=constant \
   actor_rollout_ref.actor.optim.lr_warmup_steps_ratio=0.0 \
   actor_rollout_ref.actor.ppo_mini_batch_size="${PPO_MINI_BATCH_SIZE}" \
   actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu="${PPO_MICRO_BATCH_SIZE_PER_GPU}" \
+  actor_rollout_ref.actor.clip_ratio_low=0.2 \
+  actor_rollout_ref.actor.clip_ratio_high=0.28 \
   actor_rollout_ref.actor.use_kl_loss=False \
   actor_rollout_ref.actor.kl_loss_type=low_var_kl \
   actor_rollout_ref.actor.fsdp_config.param_offload=False \
