@@ -55,7 +55,11 @@ AutoDL 127.0.0.1:17891
 在 AutoDL 上验证：
 
 ```bash
+command -v codex
+codex --version
+echo "$ALL_PROXY"
 curl -I -m 20 --socks5-hostname 127.0.0.1:17891 https://api.openai.com/v1/models
+curl -I -m 20 https://api.openai.com/v1/models
 ```
 
 成功标志：
@@ -65,7 +69,15 @@ HTTP/2 401
 www-authenticate: Bearer realm="OpenAI API"
 ```
 
-`401` 是正常结果，说明网络通，只是没有 API key。
+`401` 是正常结果，说明网络通，只是没有 API key。第一条 `curl --socks5-hostname` 验证 `ssh -R` 端口本身；第二条普通 `curl` 验证当前 shell 的 `ALL_PROXY/HTTPS_PROXY/HTTP_PROXY` 是否生效。
+
+如果刚执行配置脚本但 `echo "$ALL_PROXY"` 为空，先重载 shell：
+
+```bash
+exec bash
+```
+
+如果 `--socks5-hostname` 失败，通常是实验室服务器上保持的 `ssh -R` 会话断了，需要重新拉起隧道。
 
 ## Use For Codex
 

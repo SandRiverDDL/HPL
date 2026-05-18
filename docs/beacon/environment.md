@@ -129,6 +129,18 @@ export HTTP_PROXY=socks5h://127.0.0.1:17891
 
 如果后续要用 AutoDL 直连或学术加速下载大文件，先执行 `scripts/autodl/remove_codex_proxy.sh` 或在当前 shell 临时 `unset ALL_PROXY HTTPS_PROXY HTTP_PROXY all_proxy https_proxy http_proxy`。
 
+Codex 网络排查命令：
+
+```bash
+command -v codex
+codex --version
+echo "$ALL_PROXY"
+curl -I -m 20 --socks5-hostname 127.0.0.1:17891 https://api.openai.com/v1/models
+curl -I -m 20 https://api.openai.com/v1/models
+```
+
+正常网络结果是 `HTTP/2 401` 和 `www-authenticate: Bearer realm="OpenAI API"`；`401` 不是错误，表示 OpenAI API 可达但未带 API key。若 `echo "$ALL_PROXY"` 为空，先执行 `exec bash` 重载 `.bashrc`。若 `--socks5-hostname` 失败，通常是实验室服务器上的 `ssh -R 127.0.0.1:17891` 隧道断了。
+
 AutoDL small/synthetic WebShop 已传入的必要小文件：
 
 ```text
