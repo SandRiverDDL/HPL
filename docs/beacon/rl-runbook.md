@@ -192,6 +192,28 @@ TEST_FREQ=0
 
 该 run 使用 `trainer.resume_mode=auto`，同名目录已有 `global_step_3` calibration checkpoint，因此目标 `TOTAL_TRAINING_STEPS=25` 表示从 step 3 继续到 step 25，而不是额外训练 25 step。日志已确认 `env.seed=1025`、`WebShop train goal count: 6410`、`WebShop val goal count: 50`。
 
+当前活跃 true-1K 25 step run（2026-05-18）：
+
+```bash
+tmux: hpl_beacon_true1k_rl_25_gpu125
+log: logs/beacon_webshop_true1k_b6n4_25step_seed1025.log
+CUDA_VISIBLE_DEVICES=1,2,5
+TRAINER_EXPERIMENT_NAME=hpl_lora_migpo_qwen2_5_1p5b_webshop_true1k_b6n4_25step_seed1025
+ENV_SEED=1025
+TRAIN_BATCH_SIZE=6
+ROLLOUT_N=4
+PPO_MINI_BATCH_SIZE=24
+PPO_MICRO_BATCH_SIZE_PER_GPU=4
+LOG_PROB_MICRO_BATCH_SIZE_PER_GPU=4
+VLLM_GPU_MEMORY_UTILIZATION=0.65
+TOTAL_EPOCHS=25
+TOTAL_TRAINING_STEPS=25
+SAVE_FREQ=25
+TEST_FREQ=0
+```
+
+该 run 使用新的 experiment name，启动前确认 checkpoint 目录不存在，因此从 0 开始，不加载 `global_step_3` calibration checkpoint。BEACON 已在 `use_small=True` 时向 WebShop 传入 `num_products=1000`，训练和后续 HPL eval 均使用 `indexes_1k` 小索引。
+
 BEACON 原 WebShop MIGPO 脚本：
 
 ```text
@@ -233,7 +255,7 @@ configs/task/webshop_small_synth_test200.json
 configs/task/webshop_small_synth_dev50.json
 ```
 
-注意：HPL 评测要和 BEACON small/synthetic 口径一致，不仅要使用 `items_shuffle_1000.json` 和 `items_ins_v2_1000.json`，还必须使用 WebShop 小索引。原 WebShop `init_search_engine(num_products=1000)` 会查找 `envs/webshop/search_engine/indexes_1k`；当前 HPL 侧 small/synthetic config 和索引软链仍待修正，评测前不要直接把这两个 config 当作最终可比结果。
+注意：HPL 评测要和 BEACON small/synthetic 口径一致，不仅要使用 `items_shuffle_1000.json` 和 `items_ins_v2_1000.json`，还必须使用 WebShop 小索引。当前 HPL 侧 small/synthetic config 已设置 `num_products=1000`，会使用 `envs/webshop/search_engine/indexes_1k`；该索引已验证为 1000 docs。
 
 ## 当前风险
 
@@ -242,7 +264,7 @@ configs/task/webshop_small_synth_dev50.json
 - 旧排错阶段修复过 MiGPO milestone numpy truth-value、PEFT/Transformers tensor-parallel 兼容、LoRA adapter 保存字符串/Enum 兼容等问题；这些都属于已有 adapter 冷启动路径的本地 patch，重置 BEACON 后必须一次性恢复。
 - HPL launcher 默认 `trainer.max_actor_ckpt_to_keep=1`、`trainer.max_critic_ckpt_to_keep=1`，只保留最近一个 resume checkpoint；LoRA adapter 另存到 `saves/beacon_lora_adapters/${TRAINER_EXPERIMENT_NAME}/global_step_*`，用于评测、merge 和手工挑选。
 - 正式短跑建议先用 `TOTAL_TRAINING_STEPS=50`、`TRAINER_LOGGER="['console','wandb']"`、`SAVE_FREQ=25`、`TEST_FREQ=0`。`TEST_FREQ=0` 会关闭训练中的 `_validate()`，dev/test 评测改为训练后单独跑，避免 WebShop validate 拖慢或干扰训练曲线。
-- BEACON 没有独立轻量 WebShop eval runner；`trainer.val_only=True` 也会启动 Ray/vLLM/PPO trainer 体系。三组模型横向评测优先走 HPL `evaluation.py`，但要先修正 small index 口径。
+- BEACON 没有独立轻量 WebShop eval runner；`trainer.val_only=True` 也会启动 Ray/vLLM/PPO trainer 体系。三组模型横向评测优先走 HPL `evaluation.py`。
 - `lr=1e-5` 且关闭 KL loss 偏激进；如果 invalid action 或格式漂移上升，应改为 `3e-6` 或开启小 KL。
 - BEACON WebShop 当前使用 `gym==0.24.0`，会输出停止维护 warning；不要升级到 `0.26.2`，否则旧 WebShop env 会因 `action_space/observation_space` 检查失败。
 - 运行前必须确认 GPU 空闲；若目标 GPU 上是 HPL 的 `scripts/train_model.py` 占卡程序，可按 `AGENTS.md` 规则停止，并在任务结束后用默认参数恢复。
@@ -274,5 +296,5 @@ PY
 ## 待验证
 
 - 当前 n=4 50 step run 能否跑到 `SAVE_FREQ=25` 并正常保存 resume checkpoint 与独立 LoRA adapter。
-- 当前 25 step milestone run 是否能从 `global_step_3` resume 到 `global_step_25` 并保存独立 LoRA adapter。
-- 训练结束后修正 HPL small index，再用 HPL `evaluation.py` 对 Qwen2.5-1.5B-Instruct、SFT LoRA、RL LoRA 三组模型跑同一个 BEACON small/synthetic test200。
+- 当前 true-1K 25 step run 是否能从 0 跑到 `global_step_25` 并保存独立 LoRA adapter。
+- 训练结束后用 HPL `evaluation.py` 对 Qwen2.5-1.5B-Instruct、SFT LoRA、RL LoRA 三组模型跑同一个 BEACON small/synthetic test200。

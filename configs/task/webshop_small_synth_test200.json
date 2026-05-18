@@ -12,7 +12,7 @@
         "file_path": "envs/webshop/data/items_shuffle_1000.json",
         "attr_path": "envs/webshop/data/items_ins_v2_1000.json",
         "human_goals": false,
-        "num_products": null
+        "num_products": 1000
     },
     "output_dir": "outputs/webshop_small_synth_test200"
 }

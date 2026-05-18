@@ -33,7 +33,17 @@ configs/task/webshop_small_synth_dev50.json
 搜索索引：envs/webshop/search_engine/indexes_1k
 ```
 
-原 WebShop 代码中 `num_products=1000` 会选择 `indexes_1k`；`num_products=null` 会选择 `indexes`。因此 HPL small/synthetic 评测配置必须显式使用 `num_products=1000`，并保证 `indexes_1k` 指向与 BEACON small/synthetic 口径一致的小索引。当前该索引对齐仍是待办，未修正前不要把 HPL `webshop_small_synth_*` 评测结果作为 BEACON 可比结果。
+原 WebShop 代码中 `num_products=1000` 会选择 `indexes_1k`；`num_products=null` 会选择 `indexes`。当前 HPL small/synthetic 评测配置已显式使用 `num_products=1000`，并已构建：
+
+```text
+envs/webshop/search_engine/indexes_1k
+```
+
+验证口径：
+
+```text
+LuceneSearcher("envs/webshop/search_engine/indexes_1k").num_docs == 1000
+```
 
 HPL 启动 BEACON 时默认传入：
 
@@ -45,6 +55,8 @@ env.webshop.val_start_idx=200
 env.webshop.val_end_idx=250
 env.webshop.exclude_goal_indices_path=null
 ```
+
+BEACON 本地 `env_manager.py` 在 `env.webshop.use_small=True` 时会向 WebShop 传入 `num_products=1000`，因此 RL 训练也使用 `indexes_1k`。BEACON 旧的 `search_engine/indexes -> HPL full index` 软链已移除，当前只保留本地 `search_engine/indexes_1k` 供 small/synthetic 训练使用。
 
 ## full human 旧口径风险
 
